@@ -1,11 +1,11 @@
 pipeline {
- agent slave
+ agent { label 'slave' }
 
  tools {
     jdk 'jdk17'
     maven 'maven3'
  }
- enviornment {
+ environment {
    SCANNER_HOME= tool 'sonar-scanner'
  }
  

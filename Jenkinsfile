@@ -1,5 +1,5 @@
 pipeline {
- agent any
+ agent slave
 
  tools {
     jdk 'jdk17'
@@ -86,15 +86,25 @@ pipeline {
        }
      }
    }
-  stage('Integrate Jenkins with EKS Cluster and Deploy App') {
-            steps {
-                withAWS(credentials: 'aws-cred', region: 'us-east-2') {
-                  script {
-                    
-                    sh "kubectl apply -f deployment.svc.yaml"
-                }
-                }
+  stage('Deploy To Kubernetes') {
+     steps {
+          withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '',
+            credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false,
+             serverUrl: 'https://172.31.31.143:6443') {
+               sh "kubectl apply -f deployment-svc.yaml"
+         }
         }
-    }
-
+       }
+  stage('Verify the Deployment') {
+     steps {
+          withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '',
+            credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false,
+              serverUrl: 'https://172.31.31.143:6443') {
+                sh "kubectl get pods -n webapps"
+                sh "kubectl get svc -n webapps"
+        }
+     }
+   }
+ 
+ }
 }

@@ -52,18 +52,10 @@ pipeline {
        }
       }
      }
-   stage('Build') {
-     steps {
-       sh "mvn package"
-      }
-    }
-   stage('Publish To Nexus') {
-     steps {
-         withMaven(globalMavenSettingsConfig: 'Global-settings', jdk: 'jdk17',
-         maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
-              sh "mvn deploy"
-       }
-      }
+   stage('Code Build') {
+        steps{
+           sh "mvn clean install"
+        }
      }
    stage('Build & Tag Docker Image') {
       steps {

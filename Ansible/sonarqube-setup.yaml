@@ -1,0 +1,36 @@
+---
+- name: Deploy Sonarqube with Docker
+  hosts: sonarqube
+  become: yes
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: give 777 permissions on /var/run/docker.sock
+      file: 
+        path: /var/run/docker.sock
+        state: file 
+        mode: 0777
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Sonarqube Docker image
+      docker_image:
+        name: sonarqube
+        tag: latest
+
+    - name: Start Sonarqube Docker container
+      docker_container:
+        name: sonarqube
+        image: sonarqube:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "9000:9000"  
